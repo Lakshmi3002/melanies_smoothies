@@ -35,9 +35,8 @@ name_on_order = st.text_input("Name on Smoothie:")
 my_dataframe = session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS").select(col("FRUIT_NAME"), col("SEARCH_ON"))
          
 
-
 # ✅ IMPORTANT: already pandas
-pd_df = my_dataframe
+pd_df = my_dataframe.to_pandas()
 
 # -----------------------------
 # Ingredient Selector
