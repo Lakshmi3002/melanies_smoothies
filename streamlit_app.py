@@ -32,11 +32,9 @@ name_on_order = st.text_input("Name on Smoothie:")
 # -----------------------------
 # Load fruit options (Snowflake → Pandas)
 # -----------------------------
-my_dataframe = (
-    session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
-           .select(col("FRUIT_NAME"), col("SEARCH_ON"))
-           .to_pandas()
-)
+my_dataframe = session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS").select(col("FRUIT_NAME"), col("SEARCH_ON"))
+         
+
 
 # ✅ IMPORTANT: already pandas
 pd_df = my_dataframe
