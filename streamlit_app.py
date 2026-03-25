@@ -32,13 +32,14 @@ name_on_order = st.text_input("Name on Smoothie:")
 # -----------------------------
 # Load fruit options (Snowflake → Pandas)
 # -----------------------------
-my_dataframe = session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS").select(col("FRUIT_NAME"), col("SEARCH_ON"))
-         
+pd_df = (
+    session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
+           .select(col("FRUIT_NAME"), col("SEARCH_ON"))
+           .to_pandas()
+)
 
-# ✅ IMPORTANT: already pandas
-pd_df = my_dataframe.to_pandas()
+# ✅ Debug view (safe)
 st.dataframe(pd_df)
-st.stop()
 
 # -----------------------------
 # Ingredient Selector
@@ -52,20 +53,33 @@ ingredients_list = st.multiselect(
 # -----------------------------
 # Process Selection
 # -----------------------------
-if ingredients_list:
+if ingredients_list and name_on_order:
 
-    ingredients_string = ''
+    ingredients_string = ""
 
     for fruit_chosen in ingredients_list:
 
-        ingredients_string += fruit_chosen + ' '
+        ingredients_string += fruit_chosen + " "
 
-        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        st.write('The search value fo ', fruit_chosen,' is ', search_on, ',')
-        st.subheader(fruit_chosen + ' Nutrition Information')
+        search_on = pd_df.loc[
+            pd_df["FRUIT_NAME"] == fruit_chosen,
+            "SEARCH_ON"
+        ].iloc[0]
 
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
-        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+        st.write(
+            f"Search value for {fruit_chosen} is {search_on}"
+        )
+
+        st.subheader(f"{fruit_chosen} Nutrition Information")
+
+        response = requests.get(
+            f"https://my.smoothiefroot.com/api/fruit/{search_on}"
+        )
+
+        if response.status_code == 200:
+            st.dataframe(response.json(), use_container_width=True)
+        else:
+            st.error("Nutrition data not found.")
 
     insert_sql = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
