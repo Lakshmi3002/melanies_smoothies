@@ -30,29 +30,25 @@ st.write("Choose the fruits you want in your custom smoothie!")
 name_on_order = st.text_input("Name on Smoothie:")
 
 # -----------------------------
-# Load Fruit Options
+# Load fruit options (Snowflake → Pandas)
 # -----------------------------
-
-# Load fruit options from Snowflake
-my_dataframe = (
+fruit_df = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
            .select(col("FRUIT_NAME"), col("SEARCH_ON"))
            .to_pandas()
 )
 
+# ✅ fruit_df IS ALREADY A PANDAS DATAFRAME
+pd_df = fruit_df
 
 # -----------------------------
 # Ingredient Selector
 # -----------------------------
-
-pd_df = my_dataframe
-
 ingredients_list = st.multiselect(
     "Choose up to 5 ingredients:",
     pd_df["FRUIT_NAME"].tolist(),
     max_selections=5
 )
-
 
 # -----------------------------
 # Process Selection
@@ -66,8 +62,8 @@ if ingredients_list and name_on_order:
         ingredients_string += fruit_chosen + " "
 
         # ✅ Get SEARCH_ON value for API
-        search_on = fruit_df.loc[
-            fruit_df["FRUIT_NAME"] == fruit_chosen,
+        search_on = pd_df.loc[
+            pd_df["FRUIT_NAME"] == fruit_chosen,
             "SEARCH_ON"
         ].iloc[0]
 
