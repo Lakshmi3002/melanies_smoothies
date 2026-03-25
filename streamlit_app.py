@@ -28,9 +28,10 @@ st.write("The name on your smoothie will be:", name_on_order)
 # Load fruit options from Snowflake
 fruit_df = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
-           .select("FRUIT_NAME")
-           .to_pandas()
-)
+           .select(col('FRUIT_NAME'),col('SEARCH_ON'))
+st.dataframe(data=my_dataframe, use_container_width=True)
+st.stop()
+           
 
 ingredients_list = st.multiselect(
     "Choose up to 5 ingredients:",
