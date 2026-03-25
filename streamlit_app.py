@@ -52,3 +52,8 @@ if ingredients_list and name_on_order:
 
 else:
     st.info("Pick at least one ingredient and enter your name to continue.")
+
+
+import requests  
+smoothiefroot_response = requests.get("[https://my.smoothiefroot.com/api/fruit/watermelon](https://my.smoothiefroot.com/api/fruit/watermelon)")  
+st.text(smoothiefroot_response)
