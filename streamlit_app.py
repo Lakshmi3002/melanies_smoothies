@@ -79,14 +79,19 @@ if ingredients_list and name_on_order:
         else:
             st.error("Nutrition data not found.")
 
-    insert_sql = f"""
-        INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
-        VALUES ('{ingredients_string.strip()}', '{name_on_order}');
+    ingredients_string = " ".join(ingredients_list)
+
+    order_filled = st.checkbox("Mark Order as Filled?")
+
+    insert_sql = """
+        INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER, ORDER_FILLED)
+        VALUES (:1, :2, :3)
     """
 
     if st.button("Submit Order"):
-        session.sql(insert_sql).collect()
-        st.success("Your Smoothie is ordered! ✅")
+        session.sql(insert_sql, params=[ingredients_string, name_on_order, order_filled]).collect()
+        st.success("Order submitted!")
+    
 
 else:
     st.info("Enter your name and pick ingredients to continue.")
