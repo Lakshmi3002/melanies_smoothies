@@ -1,59 +1,58 @@
 # Import python packages
 import streamlit as st
+from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
-from snowflake.snowpark.context import get_active_session
 
-# Title
-st.title(f"Customize Your Smoothie! :balloon: {st.__version__}")
+# ----- Snowflake Connection -----
+# Replace these with your actual Snowflake credentials or Streamlit Secrets
+connection_parameters = {
+    "account": "GLZCOCF-FXB69329",
+    "user": "Sri12345",
+    "password": "Srilakshmi@2003",
+    "role": "SYSADMIN",
+    "warehouse": "COMPUTE_WH",
+    "database": "SMOOTHIES",
+    "schema": "PUBLIC"
+}
+
+session = Session.builder.configs(connection_parameters).create()
+
+# ----- UI -----
+st.title("Customize Your Smoothie! 🥤")
 st.write("Choose the fruits you want in your custom smoothie!")
 
-# User enters name
 name_on_order = st.text_input("Name on Smoothie:")
-st.write('The name on your smoothie will be:', name_on_order)
+st.write("The name on your smoothie will be:", name_on_order)
 
-# Snowflake session from Streamlit
-session = get_active_session()
-
-# Load ingredient list from Snowflake
-my_dataframe = (
+# Load fruit options from Snowflake
+fruit_df = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
-           .select(col("FRUIT_NAME"))
+           .select("FRUIT_NAME")
            .to_pandas()
 )
 
-# Multiselect lets the user pick up to 5 fruit names
 ingredients_list = st.multiselect(
     "Choose up to 5 ingredients:",
-    my_dataframe["FRUIT_NAME"].tolist(),
+    fruit_df["FRUIT_NAME"].tolist(),
     max_selections=5
 )
 
-# Only run insert logic if user selected ingredients
 if ingredients_list and name_on_order:
 
-    # Construct ingredient string
     ingredients_string = ", ".join(ingredients_list)
 
-    # Build SQL insert safely
-    my_insert_stmt = f"""
+    sql_to_run = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
         VALUES ('{ingredients_string}', '{name_on_order}');
     """
 
-    # Show user the SQL (optional debugging)
-    st.write("Order Preview:", my_insert_stmt)
+    st.write("SQL Preview:", sql_to_run)
 
-    # Button to confirm submission
-    time_to_insert = st.button("Submit Order")
+    submit = st.button("Submit Order")
 
-    if time_to_insert:
-        session.sql(my_insert_stmt).collect()
+    if submit:
+        session.sql(sql_to_run).collect()
         st.success("Your Smoothie is ordered! ✅")
 
 else:
-    st.info("Pick at least one ingredient and enter your name to continue.")
-
-
-import requests  
-smoothiefroot_response = requests.get("[https://my.smoothiefroot.com/api/fruit/watermelon](https://my.smoothiefroot.com/api/fruit/watermelon)")  
-st.text(smoothiefroot_response)
+    st.info("Enter your name and pick ingredients to continue.")
