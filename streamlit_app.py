@@ -37,6 +37,8 @@ my_dataframe = session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS").select(col("FRUIT
 
 # ✅ IMPORTANT: already pandas
 pd_df = my_dataframe.to_pandas()
+st.dataframe(pd_df)
+st.stop()
 
 # -----------------------------
 # Ingredient Selector
