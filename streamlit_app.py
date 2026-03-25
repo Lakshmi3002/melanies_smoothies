@@ -38,21 +38,25 @@ ingredients_list = st.multiselect(
     max_selections=5
 )
 
-if ingredients_list and name_on_order:
+if ingredients_list:
 
-    ingredients_string = ", ".join(ingredients_list)
+    ingredients_string = ''
 
-    # 🔹 Example: show info for one fruit (watermelon)
-    smoothiefroot_response = requests.get(
-        "https://my.smoothiefroot.com/api/fruit/watermelon"
-    )
-
-    if smoothiefroot_response.status_code == 200:
-        st.subheader("Fruit Nutrition Info 🍉")
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+        st.subheader(fruit_chosen + ' Nutrition Information')
+        smoothiefroot_response = requests.get(
+        "https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
+    
         st.dataframe(
             smoothiefroot_response.json(),
             use_container_width=True
         )
+
+    # 🔹 Example: show info for one fruit (watermelon)
+ 
+
+
 
     sql_to_run = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
