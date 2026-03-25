@@ -32,14 +32,14 @@ name_on_order = st.text_input("Name on Smoothie:")
 # -----------------------------
 # Load fruit options (Snowflake → Pandas)
 # -----------------------------
-fruit_df = (
+my_dataframe = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
            .select(col("FRUIT_NAME"), col("SEARCH_ON"))
            .to_pandas()
 )
 
-# ✅ fruit_df IS ALREADY A PANDAS DATAFRAME
-pd_df = fruit_df
+# ✅ IMPORTANT: already pandas
+pd_df = my_dataframe
 
 # -----------------------------
 # Ingredient Selector
@@ -61,17 +61,11 @@ if ingredients_list and name_on_order:
 
         ingredients_string += fruit_chosen + " "
 
-        # ✅ Get SEARCH_ON value for API
         search_on = pd_df.loc[
             pd_df["FRUIT_NAME"] == fruit_chosen,
             "SEARCH_ON"
         ].iloc[0]
 
-        st.write(
-            f"Search value for **{fruit_chosen}** is **{search_on}**"
-        )
-
-        # ✅ Call external API using SEARCH_ON
         st.subheader(f"{fruit_chosen} Nutrition Information")
 
         response = requests.get(
@@ -83,17 +77,12 @@ if ingredients_list and name_on_order:
         else:
             st.error("Nutrition data not found.")
 
-    # -----------------------------
-    # Insert Order
-    # -----------------------------
     insert_sql = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
         VALUES ('{ingredients_string.strip()}', '{name_on_order}');
     """
 
-    submit = st.button("Submit Order")
-
-    if submit:
+    if st.button("Submit Order"):
         session.sql(insert_sql).collect()
         st.success("Your Smoothie is ordered! ✅")
 
