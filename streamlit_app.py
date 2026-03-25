@@ -32,20 +32,27 @@ name_on_order = st.text_input("Name on Smoothie:")
 # -----------------------------
 # Load Fruit Options
 # -----------------------------
-fruit_df = (
+
+# Load fruit options from Snowflake
+my_dataframe = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
            .select(col("FRUIT_NAME"), col("SEARCH_ON"))
            .to_pandas()
 )
 
+
 # -----------------------------
 # Ingredient Selector
 # -----------------------------
+
+pd_df = my_dataframe
+
 ingredients_list = st.multiselect(
     "Choose up to 5 ingredients:",
-    fruit_df["FRUIT_NAME"].tolist(),
+    pd_df["FRUIT_NAME"].tolist(),
     max_selections=5
 )
+
 
 # -----------------------------
 # Process Selection
