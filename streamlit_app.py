@@ -2,6 +2,7 @@
 import streamlit as st
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
+import requests
 
 # ----- Snowflake Connection -----
 # Replace these with your actual Snowflake credentials or Streamlit Secrets
@@ -41,12 +42,22 @@ if ingredients_list and name_on_order:
 
     ingredients_string = ", ".join(ingredients_list)
 
+    # 🔹 Example: show info for one fruit (watermelon)
+    smoothiefroot_response = requests.get(
+        "https://my.smoothiefroot.com/api/fruit/watermelon"
+    )
+
+    if smoothiefroot_response.status_code == 200:
+        st.subheader("Fruit Nutrition Info 🍉")
+        st.dataframe(
+            smoothiefroot_response.json(),
+            use_container_width=True
+        )
+
     sql_to_run = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
         VALUES ('{ingredients_string}', '{name_on_order}');
     """
-
-    st.write("SQL Preview:", sql_to_run)
 
     submit = st.button("Submit Order")
 
@@ -56,21 +67,3 @@ if ingredients_list and name_on_order:
 
 else:
     st.info("Enter your name and pick ingredients to continue.")
-
-import requests
-
-smoothiefroot_response = requests.get(
-    "https://my.smoothiefroot.com/api/fruit/watermelon"
-)
-
-st.text(smoothiefroot_response.text)
-
-
-import requests
-
-smoothiefroot_response = requests.get(
-    "https://my.smoothiefroot.com/api/fruit/watermelon"
-)
-
-#st.text(smoothiefroot_response.json())
-sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
