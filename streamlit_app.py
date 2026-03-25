@@ -31,7 +31,7 @@ name_on_order = st.text_input("Name on Smoothie:")
 
 # -----------------------------
 # Load fruit options
-# (Snowpark → Pandas, ONLY ONCE)
+# ✅ Snowpark → Pandas (ONCE)
 # -----------------------------
 pd_df = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
@@ -39,8 +39,8 @@ pd_df = (
            .to_pandas()
 )
 
-# Optional: show data for debugging
-# st.dataframe(pd_df)
+# Optional debug
+st.dataframe(pd_df)
 
 # -----------------------------
 # Ingredient Selector
@@ -59,9 +59,9 @@ if ingredients_list and name_on_order:
     ingredients_string = ""
 
     for fruit_chosen in ingredients_list:
+
         ingredients_string += fruit_chosen + " "
 
-        # Get SEARCH_ON value
         search_on = pd_df.loc[
             pd_df["FRUIT_NAME"] == fruit_chosen,
             "SEARCH_ON"
@@ -78,9 +78,6 @@ if ingredients_list and name_on_order:
         else:
             st.error("Nutrition data not found.")
 
-    # -----------------------------
-    # Insert Order
-    # -----------------------------
     insert_sql = f"""
         INSERT INTO SMOOTHIES.PUBLIC.ORDERS (INGREDIENTS, NAME_ON_ORDER)
         VALUES ('{ingredients_string.strip()}', '{name_on_order}');
